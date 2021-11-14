@@ -25,7 +25,9 @@ class Point:
     
     def __str__(self) -> str:
         return '[' + str(self.x) + ',' + str(self.y) + ']'
-
+    
+    def __repr__(self) -> str:
+        return '[' + str(self.x) + ',' + str(self.y) + ']'
 class MotionPlanner:
     # Heuristic and also G value
     def cal_cost(self, current_point, target_point):
@@ -82,8 +84,8 @@ class MotionPlanner:
         end = Point(goal[0], goal[1])
         print(start.x, start.y, end.x, end.y)
         self.map_img = map_img
-        self.map_width = self.map_img.shape[0]
-        self.map_height = self.map_img.shape[1]
+        self.map_width = self.env.grid_width
+        self.map_height = self.env.grid_height
         open_list = [start]
         path = []
         close_set = set()
@@ -110,7 +112,8 @@ class MotionPlanner:
                 path.reverse()
                 break
 
-            neighbours = self.get_neighbours(int(self.map_width / 100) , int(self.map_height / 100), current_point)
+            neighbours = self.get_neighbours(int(self.map_width) , int(self.map_height), current_point)
+            print(neighbours)
             for neighbour in neighbours:
                 ## Find v and w for neighbour 
                 if neighbour in close_set:
@@ -131,7 +134,7 @@ class MotionPlanner:
         
         
         dts = dts.reshape((-1,1,2))
-        self.map_img = cv2.polylines(self.map_img,[dts],False,(0,0,255), thickness=30)
-        cv2.imshow("map", self.map_img)
-        cv2.waitKey(10)
+        # self.map_img = cv2.polylines(self.map_img,[dts],False,(0,0,255), thickness=30)
+        # cv2.imshow("map", self.map_img)
+        # cv2.waitKey(10)
         return path

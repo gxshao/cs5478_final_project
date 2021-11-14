@@ -23,21 +23,22 @@ from gym_duckietown.wrappers import UndistortWrapper
 parser = argparse.ArgumentParser()
 
 # Do not change this
-parser.add_argument('--max_steps', type=int, default=1500, help='max_steps')
+parser.add_argument('--map-name', '-m', default="map2_2", type=str)
+parser.add_argument('--seed', '-s', default=5, type=int)
+parser.add_argument('--start-tile', '-st', default="1,6", type=str, help="two numbers separated by a comma")
+parser.add_argument('--goal-tile', '-gt', default="3,4", type=str, help="two numbers separated by a comma")
 
-# You should set them to different map name and seed accordingly
-parser.add_argument('--map-name', default='map2')
-parser.add_argument('--seed', type=int, default=11, help='random seed')
 args = parser.parse_args()
 
 env = DuckietownEnv(
-    map_name = args.map_name,
-    domain_rand = False,
-    draw_bbox = False,
-    max_steps = args.max_steps,
-    seed = args.seed
+    domain_rand=False,
+    max_steps=5000,
+    map_name=args.map_name,
+    seed=args.seed,
+    user_tile_start=args.start_tile,
+    goal_tile=args.goal_tile,
+    randomize_maps_on_reset=False   
 )
-
 env.reset()
 env.render()
 
@@ -91,9 +92,9 @@ def update(dt):
     # Speed boost
     if key_handler[key.LSHIFT]:
         action *= 1.5
-
+    print(env.cur_angle)
     obs, reward, done, info = env.step(action)
-    print('step_count = %s, reward=%.3f' % (env.unwrapped.step_count, reward))
+    #print('step_count = %s, reward=%.3f' % (env.unwrapped.step_count, reward))
 
     if key_handler[key.RETURN]:
         from PIL import Image

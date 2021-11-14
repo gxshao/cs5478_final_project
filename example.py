@@ -11,10 +11,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--max_steps', type=int, default=1500, help='max_steps')
 
 # You should set them to different map name and seed accordingly
-parser.add_argument('--map-name', '-m', default="map4_0", type=str)
-parser.add_argument('--seed', '-s', default=2, type=int)
-parser.add_argument('--start-tile', '-st', default="1,13", type=str, help="two numbers separated by a comma")
-parser.add_argument('--goal-tile', '-gt', default="3,3", type=str, help="two numbers separated by a comma")
+parser.add_argument('--map-name', '-m', default="map1_0", type=str)
+parser.add_argument('--seed', '-s', default=1, type=int)
+parser.add_argument('--start-tile', '-st', default="0,1", type=str, help="two numbers separated by a comma")
+parser.add_argument('--goal-tile', '-gt', default="5,1", type=str, help="two numbers separated by a comma")
 args = parser.parse_args()
 
 env = DuckietownEnv(
@@ -42,7 +42,7 @@ cv2.imshow("map", map_img)
 cv2.waitKey(200)
 
 # please remove this line for your own policy
-actions = np.loadtxt('./map4_0_seed2_start_1,13_goal_3,3.txt', delimiter=',')
+actions = np.loadtxt('/home/marshall/Desktop/duckietown/map1_0_seed1_start_0,1_goal_5,1.txt', delimiter=',')
 
 for (speed, steering) in actions:
     obs, reward, done, info = env.step([speed, steering])
