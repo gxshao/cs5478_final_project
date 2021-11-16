@@ -39,7 +39,9 @@ env = DuckietownEnv(
     goal_tile=args.goal_tile,
     randomize_maps_on_reset=False   
 )
-env.reset()
+print("Params:", args.map_name, args.start_tile, args.goal_tile, args.seed)
+
+# env.reset()
 env.render()
 
 @env.unwrapped.window.event
@@ -92,7 +94,6 @@ def update(dt):
     # Speed boost
     if key_handler[key.LSHIFT]:
         action *= 1.5
-    print(env.cur_angle)
     obs, reward, done, info = env.step(action)
     #print('step_count = %s, reward=%.3f' % (env.unwrapped.step_count, reward))
 

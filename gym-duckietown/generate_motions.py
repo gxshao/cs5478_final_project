@@ -1,6 +1,7 @@
 import argparse
 from ctypes import alignment
 from genericpath import getctime
+from logging import FATAL
 from math import nan
 from os import curdir, spawnlpe, strerror
 from hybrid_planner import *
@@ -18,10 +19,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--max_steps', type=int, default=5000, help='max_steps')
 
 # You should set them to different map name and seed accordingly
-parser.add_argument('--map-name', '-m', default="map5_0", type=str)
-parser.add_argument('--seed', '-s', default=0, type=int)
-parser.add_argument('--start-tile', '-st', default="10,4", type=str, help="two numbers separated by a comma")
-parser.add_argument('--goal-tile', '-gt', default="2,9", type=str, help="two numbers separated by a comma")
+parser.add_argument('--map-name', '-m', default="map5_4", type=str)
+parser.add_argument('--seed', '-s', default=5, type=int)
+parser.add_argument('--start-tile', '-st', default="3,10", type=str, help="two numbers separated by a comma")
+parser.add_argument('--goal-tile', '-gt', default="15,9", type=str, help="two numbers separated by a comma")
 args = parser.parse_args()
 
 env = DuckietownEnv(
@@ -34,7 +35,6 @@ env = DuckietownEnv(
     randomize_maps_on_reset=False   
 )
 
-obs = env.reset()
 env.render()
 
 
@@ -43,11 +43,20 @@ print("start tile:", start_pos, " goal tile:", goal)
 
 curve_angles = {(1, -1):1, (1, 1):0, (-1,1):3, (-1,-1):2}
 planner = MotionPlanner(env)
-# path =planner.astar()
+path =planner.astar()
+# path = [[1, 6], [1, 7], [1, 8], [2, 8], [2, 9], [3, 9], [3, 10], [4, 10], [4, 11], [5, 11], [6, 11], [6, 12], [6, 13], [7, 13], [8, 13], [9, 13], [10, 13], [11, 13], [12, 13], [12, 14], [12, 15]]
+# path = [[10, 7], [11, 7], [11, 6], [11, 5], [11, 4], [10, 4], [9, 4], [8, 4], [8, 3], [8, 2], [9, 2], [10, 2], [10, 1]]
+# path = [[10, 5], [11, 5], [11, 6], [11, 7], [10, 7], [10, 8], [10, 9], [9, 9], [8, 9], [8, 10], [8, 11], [7, 11]]
+# path = [[5, 11], [5, 10], [5, 9], [5, 8], [4, 8], [3, 8], [2, 8], [1, 8], [1, 7]]
+# path = [[5, 7], [5, 6], [5, 5], [5, 4], [4, 4], [3, 4], [2, 4], [2, 3], [2, 2]]
+# path = [[1, 2], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [5, 4]]
+# path = [[3, 6], [3, 5], [3, 4], [3, 3], [4, 3], [5, 3], [5, 2], [5, 1], [6, 1], [7, 1]]
+# path = [[7, 7], [6, 7], [5, 7], [5, 6], [5, 5], [4, 5], [3, 5], [3, 4], [3, 3], [2, 3], [1, 3], [1, 2], [1, 1]]
+# path = [[50, 1], [51, 1], [52, 1], [53, 1], [54, 1], [55, 1], [56, 1], [57, 1], [58, 1], [59, 1], [60, 1], [61, 1], [62, 1], [63, 1], [64, 1], [65, 1], [66, 1], [67, 1], [68, 1], [69, 1], [70, 1], [71, 1], [72, 1], [73, 1], [74, 1], [75, 1], [76, 1], [77, 1], [78, 1], [79, 1], [80, 1], [81, 1], [82, 1], [83, 1], [84, 1], [85, 1], [86, 1], [87, 1], [88, 1], [89, 1], [90, 1]]
 # path = [[1, 8], [1, 7], [2, 7], [3, 7], [4, 7], [5, 7], [6, 7], [7, 7], [8, 7], [8, 6], [8, 5], [9, 5], [9, 4], [10, 4], [11, 4], [12, 4], [12, 5], [12, 6], [13, 6], [13, 7], [13, 8]]
 # path = [[0, 1], [1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [6, 1], [7, 1], [8, 1], [9, 1], [10, 1], [11, 1], [12, 1], [13, 1], [14, 1], [15, 1], [16, 1], [17, 1], [18, 1], [19, 1], [20, 1], [21, 1], [22, 1], [23, 1], [24, 1], [25, 1], [26, 1], [27, 1], [28, 1], [29, 1], [30, 1], [31, 1], [32, 1], [33, 1], [34, 1], [35, 1], [36, 1], [37, 1], [38, 1], [39, 1], [40, 1], [41, 1], [42, 1], [43, 1], [44, 1], [45, 1], [46, 1], [47, 1], [48, 1], [49, 1], [50, 1], [51, 1], [52, 1], [53, 1], [54, 1], [55, 1], [56, 1], [57, 1], [58, 1], [59, 1], [60, 1], [61, 1], [62, 1], [63, 1], [64, 1], [65, 1], [66, 1], [67, 1], [68, 1], [69, 1], [70, 1]]
 # path = [[10, 4], [9, 4], [9, 5], [8, 5], [8, 6], [8, 7], [7, 7], [6, 7], [6, 6], [6, 5], [5, 5], [5, 4], [5, 3], [4, 3], [3, 3]]
-path = [[10, 4], [11, 4], [11, 5], [11, 6], [11, 7], [10, 7], [9, 7], [8, 7], [8, 6], [7, 6], [7, 5], [6, 5], [5, 5], [4, 5], [3, 5], [2, 5], [1, 5], [1, 6], [1, 7], [1, 8], [2, 8], [2, 9]]
+# path = [[10, 4], [11, 4], [11, 5], [11, 6], [11, 7], [10, 7], [9, 7], [8, 7], [8, 6], [7, 6], [7, 5], [6, 5], [5, 5], [4, 5], [3, 5], [2, 5], [1, 5], [1, 6], [1, 7], [1, 8], [2, 8], [2, 9]]
 print(path)
 total_reward = 0
 dts = np.array([], np.int32)
@@ -77,43 +86,71 @@ actions = []
 ## Initial pose calibration
 lane_alignment = False
 direction_alignment = False
+opposite_aligment = False
 
+reward = 0
 predicted_pos = [math.floor(env.cur_pos[0]), math.floor(env.cur_pos[2])]
 t = target_theta[(path[1][0] - predicted_pos[0], path[1][1] - predicted_pos[1])]
 tile = env._get_tile(predicted_pos[0], predicted_pos[1])
 
+rads_threshold = 0.3
+kd = tile['kind']
+
+if kd == 'curve_right':
+    rads_threshold = 0.5
+speed  = 0
+steering = 0
 while True:
     lane_pose = env.get_lane_pos2(env.cur_pos, env.cur_angle)
     distance_to_road_center = lane_pose.dist
     angle_from_straight_in_rads = lane_pose.angle_rad
     
     tmp_pos = [math.floor(env.cur_pos[0]), math.floor(env.cur_pos[2])]
-
-    speed  = 0
-    steering = 0
-    if not lane_alignment and angle_from_straight_in_rads < 0.1 \
-        and angle_from_straight_in_rads > -0.1:
+    
+    # print(steering, angle_from_straight_in_rads)
+    if not lane_alignment and angle_from_straight_in_rads < rads_threshold \
+        and angle_from_straight_in_rads > -rads_threshold:
         print("Done lane_alignment")
         lane_alignment = True
         if tmp_pos == path[1]:
             break
-        
-    if lane_alignment and not direction_alignment:
-        angle = int(abs(np.rad2deg(env.cur_angle)) % 360)
-        angle = math.floor((angle / 90)) 
-        c = generate_action(angle, t)
-        print(c, angle, t)
-        if (c != 0):
-            speed = 0.05
-            steering = 0.8
+    
+    print(lane_pose)
+    angle = int(abs(np.rad2deg(env.cur_angle)) % 360)
+
+    suffix = angle % 90
+    if suffix > 60:
+        suffix = 1
+    else:
+        suffix = 0
+                
+    angle = math.floor((angle / 90)) + suffix
+    c = generate_action(angle, t)
+    # print(c, angle, t)
+
+    if not lane_alignment:
+        speed = 0
+        steering = angle_from_straight_in_rads
+        print("Lane alignment")
+    elif lane_alignment and not direction_alignment:
+        if c != 0:
+            speed = 0
+            steering = 1
+            print("Tuning distance_to_road_center")
+        elif c == 0:
+            direction_alignment = True
+            print("Done Direction")
+    elif lane_alignment and direction_alignment and not opposite_aligment:
+        if distance_to_road_center < 0.03 :
+            speed = 0.2
+            steering = -0.1
+            print("Turn for correct lane")
+        elif c != 0:
+            direction_alignment = False
         else:
             print("Done Calibration")
-            direction_alignment = True
+            opposite_aligment = True
             break
-    elif not lane_alignment:
-        speed = 0
-        steering = 5*distance_to_road_center + 1*angle_from_straight_in_rads
-    
     else:
         break
     actions.append([speed, steering])
@@ -123,7 +160,7 @@ while True:
     if done:
         break
 
-
+# pyglet.app.run()
 while True:
     time.sleep(0.01)
     lane_pose = None
@@ -142,6 +179,7 @@ while True:
         distance_to_road_center = lane_pose.dist
         angle_from_straight_in_rads = lane_pose.angle_rad
         steering = k_p*distance_to_road_center + k_d*angle_from_straight_in_rads
+
     
     ###########################ACTION#######################3
     actions.append([speed, steering])
@@ -193,13 +231,14 @@ while True:
     dts = dts.reshape((-1,1,2))
     map_img = cv2.polylines(map_img,[dts],False,(0,0,255), thickness=3)
     cv2.imshow("map", map_img)
-    cv2.waitKey(100)
+    cv2.waitKey(10)
     env.render()
     if done:
         break
 
 predicted_pos = [math.floor(env.cur_pos[0]), math.floor(env.cur_pos[2])]
-print("done", predicted_pos)
 np.savetxt(f'/home/marshall/Desktop/duckietown/{args.map_name}_seed{args.seed}_start_{start_pos[0]},{start_pos[1]}_goal_{goal[0]},{goal[1]}.txt',
            actions, delimiter=',')
+
+print("done", predicted_pos)
 pyglet.app.run()

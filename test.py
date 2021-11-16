@@ -30,7 +30,6 @@ def create_test(filename, map, seed, start_pose, goal_pose):
         goal_tile=goal_pose,
         randomize_maps_on_reset=False
     )
-    env.reset()
     env.render()
     map_img, goal, start_pos = env.get_task_info()
     map_img = cv2.resize(map_img, None, fx=0.5, fy=0.5)

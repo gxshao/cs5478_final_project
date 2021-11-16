@@ -126,9 +126,9 @@ class MotionPlanner:
                     neighbour.g = n_cost
                     neighbour.h = self.cal_cost(neighbour, end)
                     neighbour.prev = current_point
-                    self.map_img = cv2.circle(self.map_img, (current_point.x * 100,current_point.y * 100), radius=0, color=(0, 0, 255), thickness=10)
-                    cv2.imshow("map", self.map_img)
-                    cv2.waitKey(10)
+                    # self.map_img = cv2.circle(self.map_img, (current_point.x * 100,current_point.y * 100), radius=0, color=(0, 0, 255), thickness=10)
+                    # cv2.imshow("map", self.map_img)
+                    # cv2.waitKey(10)
                     print("current:",current_point.x, current_point.y, current_point.angle, "selected:", neighbour.x, neighbour.y, "Cost", neighbour.g)
                     open_list.append(neighbour)
         
