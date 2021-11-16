@@ -1,7 +1,21 @@
 import numpy as np
 import math
 import cv2
-
+import json 
+import argparse
+from ctypes import alignment
+from genericpath import getctime
+from logging import FATAL
+from math import nan
+from os import curdir, spawnlpe, strerror
+from hybrid_planner import *
+from motion_planner import *
+import cv2
+import numpy as np
+from gym_duckietown.envs import DuckietownEnv
+from gym_duckietown.simulator import *
+import pyglet
+import time
 class Point:
     def __init__(self, x, y):
         self.x = x
@@ -138,3 +152,34 @@ class MotionPlanner:
         # cv2.imshow("map", self.map_img)
         # cv2.waitKey(10)
         return path
+
+# goal = "{\"map1_0\": { 		\"seed\": [1], 		\"start\": [0, 1], 		\"goal\": [5, 1] 	}, 	\"map1_1\": { 		\"seed\": [0], 		\"start\": [0, 1], 		\"goal\": [70, 1] 	}, 	\"map1_2\": { 		\"seed\": [2], 		\"start\": [2, 1], 		\"goal\": [21, 1] 	}, 	\"map1_3\": { 		\"seed\": [6], 		\"start\": [5, 1], 		\"goal\": [65, 1] 	}, 	\"map1_4\": { 		\"seed\": [5], 		\"start\": [50, 1], 		\"goal\": [90, 1] 	}, 	\"map2_0\": { 		\"seed\": [1], 		\"start\": [7, 7], 		\"goal\": [1, 1] 	}, 	\"map2_1\": { 		\"seed\": [2], 		\"start\": [3, 6], 		\"goal\": [7, 1] 	}, 	\"map2_2\": { 		\"seed\": [5], 		\"start\": [1, 6], 		\"goal\": [3, 4] 	}, 	\"map2_3\": { 		\"seed\": [4], 		\"start\": [1, 2], 		\"goal\": [5, 4] 	}, 	\"map2_4\": { 		\"seed\": [4], 		\"start\": [7, 4], 		\"goal\": [4, 7] 	}, 	\"map3_0\": { 		\"seed\": [1], 		\"start\": [5, 7], 		\"goal\": [2, 2] 	}, 	\"map3_1\": { 		\"seed\": [2], 		\"start\": [5, 11], 		\"goal\": [1, 7] 	}, 	\"map3_2\": { 		\"seed\": [3], 		\"start\": [10, 5], 		\"goal\": [7, 11] 	}, 	\"map3_3\": { 		\"seed\": [4], 		\"start\": [2, 4], 		\"goal\": [9, 1] 	}, 	\"map3_4\": { 		\"seed\": [12], 		\"start\": [5, 5], 		\"goal\": [10, 11] 	}, 	\"map4_0\": { 		\"seed\": [4], 		\"start\": [10, 4], 		\"goal\": [3, 3] 	}, 	\"map4_1\": { 		\"seed\": [4], 		\"start\": [7, 7], 		\"goal\": [1, 12] 	}, 	\"map4_2\": { 		\"seed\": [4], 		\"start\": [4, 1], 		\"goal\": [11, 11] 	}, 	\"map4_3\": { 		\"seed\": [6], 		\"start\": [1, 8], 		\"goal\": [13, 8] 	}, 	\"map4_4\": { 		\"seed\": [8], 		\"start\": [5, 10], 		\"goal\": [11, 4] 	}, 	\"map5_0\": { 		\"seed\": [0], 		\"start\": [10, 4], 		\"goal\": [2, 9] 	}, 	\"map5_1\": { 		\"seed\": [0], 		\"start\": [6, 8], 		\"goal\": [4, 13] 	}, 	\"map5_2\": { 		\"seed\": [2], 		\"start\": [10, 7], 		\"goal\": [10, 1] 	}, 	\"map5_3\": { 		\"seed\": [4], 		\"start\": [1, 6], 		\"goal\": [12, 15] 	}, 	\"map5_4\": { 		\"seed\": [5], 		\"start\": [3, 10], 		\"goal\": [15, 9] 	} }"
+# # print(goal)
+
+# goal = json.loads(goal)
+
+# result = {}
+# for key in goal:
+#     map_name = key
+#     seed = goal[key]['seed'][0]
+#     start = goal[key]['start']
+#     end = goal[key]['goal']
+#     print(key, seed, start,end)
+#     env = DuckietownEnv(
+#         domain_rand=False,
+#         max_steps=5000,
+#         map_name=map_name,
+#         seed=seed,
+#         user_tile_start=start,
+#         goal_tile=end,
+#         randomize_maps_on_reset=False   
+#         )
+#     planner = MotionPlanner(env)
+#     path =planner.astar()
+#     goal[key]['path'] = path
+#     print(key,"  ---  " ,path)
+
+# print(json.dumps(goal))
+
+# with open('new_goal.json', 'w') as f:
+#     f.write(json.dumps(goal))

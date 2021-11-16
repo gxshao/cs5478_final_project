@@ -4,22 +4,23 @@ import math
 import cv2
 import numpy as np
 from gym_duckietown.envs import DuckietownEnv
-import json 
 import os
 import time
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--path', '-m', default="/home/marshall/Desktop/duckietown/", type=str)
+parser.add_argument('--path', '-m', default="/home/marshall/Desktop/test/", type=str)
 args = parser.parse_args()
 
 target_folder = args.path
 
 targets = arr = os.listdir(target_folder)
 # print(targets)
-
+test_img_results = "test_" + time.strftime("%Y%m%d-%H%M%S")
+os.makedirs(test_img_results)
 
 def create_test(filename, map, seed, start_pose, goal_pose):
+    total_reward = 0
     print("Test start:", filename,'initial pos:',start_pose)
     env = DuckietownEnv(
         domain_rand=False,
@@ -40,6 +41,7 @@ def create_test(filename, map, seed, start_pose, goal_pose):
     for (speed, steering) in actions:
 
         obs, reward, done, info = env.step([speed, steering])
+        total_reward += reward
         d = [int(env.cur_pos[0] * 50), int(env.cur_pos[2] * 50)]
         dts = np.append(dts,d)
         dts = dts.reshape((-1,1,2))
@@ -47,8 +49,8 @@ def create_test(filename, map, seed, start_pose, goal_pose):
         cv2.imshow("map", map_img)
         cv2.waitKey(50)
         env.render()
-    print("Test finished:", filename,'finale pos:', [round(env.cur_pos[0], 2), round(env.cur_pos[2], 2)])
-    cv2.imwrite(map + '.jpg', map_img)
+    print("Test finished:", filename,'finale pos:', [round(env.cur_pos[0], 2), round(env.cur_pos[2], 2)], "final reward:", total_reward)
+    cv2.imwrite(test_img_results + '/'+ map + '.jpg', map_img)
     time.sleep(2)
     env.window.close()
     cv2.destroyAllWindows()

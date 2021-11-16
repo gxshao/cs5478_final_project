@@ -6,6 +6,7 @@ This script allows you to manually control the simulator or Duckiebot
 using the keyboard arrows.
 """
 
+import re
 import sys
 import argparse
 import pyglet
@@ -96,7 +97,7 @@ def update(dt):
         action *= 1.5
     obs, reward, done, info = env.step(action)
     #print('step_count = %s, reward=%.3f' % (env.unwrapped.step_count, reward))
-
+    print(reward)
     if key_handler[key.RETURN]:
         from PIL import Image
         im = Image.fromarray(obs)
