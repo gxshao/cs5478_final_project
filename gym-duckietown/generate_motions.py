@@ -4,8 +4,8 @@ from genericpath import getctime
 from logging import FATAL
 from math import nan
 from os import curdir, spawnlpe, strerror
-# from hybrid_planner import *
-# from motion_planner import *
+from hybrid_planner import *
+from motion_planner import *
 import cv2
 import numpy as np
 from gym_duckietown.envs import DuckietownEnv
@@ -25,23 +25,14 @@ parser.add_argument('--start-tile', '-st', default="0,1", type=str, help="two nu
 parser.add_argument('--goal-tile', '-gt', default="70,1", type=str, help="two numbers separated by a comma")
 args = parser.parse_args()
 
-goals = {"map1_0":{"seed":[1],"start":[0,1],"goal":[5,1],"path":[[0,1],[1,1],[2,1],[3,1],[4,1],[5,1]]},"map1_1":{"seed":[0],"start":[0,1],"goal":[70,1],"path":[[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],[13,1],[14,1],[15,1],[16,1],[17,1],[18,1],[19,1],[20,1],[21,1],[22,1],[23,1],[24,1],[25,1],[26,1],[27,1],[28,1],[29,1],[30,1],[31,1],[32,1],[33,1],[34,1],[35,1],[36,1],[37,1],[38,1],[39,1],[40,1],[41,1],[42,1],[43,1],[44,1],[45,1],[46,1],[47,1],[48,1],[49,1],[50,1],[51,1],[52,1],[53,1],[54,1],[55,1],[56,1],[57,1],[58,1],[59,1],[60,1],[61,1],[62,1],[63,1],[64,1],[65,1],[66,1],[67,1],[68,1],[69,1],[70,1]]},"map1_2":{"seed":[2],"start":[2,1],"goal":[21,1],"path":[[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],[13,1],[14,1],[15,1],[16,1],[17,1],[18,1],[19,1],[20,1],[21,1]]},"map1_3":{"seed":[6],"start":[5,1],"goal":[65,1],"path":[[5,1],[6,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],[13,1],[14,1],[15,1],[16,1],[17,1],[18,1],[19,1],[20,1],[21,1],[22,1],[23,1],[24,1],[25,1],[26,1],[27,1],[28,1],[29,1],[30,1],[31,1],[32,1],[33,1],[34,1],[35,1],[36,1],[37,1],[38,1],[39,1],[40,1],[41,1],[42,1],[43,1],[44,1],[45,1],[46,1],[47,1],[48,1],[49,1],[50,1],[51,1],[52,1],[53,1],[54,1],[55,1],[56,1],[57,1],[58,1],[59,1],[60,1],[61,1],[62,1],[63,1],[64,1],[65,1]]},"map1_4":{"seed":[5],"start":[50,1],"goal":[90,1],"path":[[50,1],[51,1],[52,1],[53,1],[54,1],[55,1],[56,1],[57,1],[58,1],[59,1],[60,1],[61,1],[62,1],[63,1],[64,1],[65,1],[66,1],[67,1],[68,1],[69,1],[70,1],[71,1],[72,1],[73,1],[74,1],[75,1],[76,1],[77,1],[78,1],[79,1],[80,1],[81,1],[82,1],[83,1],[84,1],[85,1],[86,1],[87,1],[88,1],[89,1],[90,1]]},"map2_0":{"seed":[1],"start":[7,7],"goal":[1,1],"path":[[7,7],[6,7],[5,7],[5,6],[5,5],[4,5],[3,5],[3,4],[3,3],[2,3],[1,3],[1,2],[1,1]]},"map2_1":{"seed":[2],"start":[3,6],"goal":[7,1],"path":[[3,6],[3,5],[3,4],[3,3],[4,3],[5,3],[5,2],[5,1],[6,1],[7,1]]},"map2_2":{"seed":[5],"start":[1,6],"goal":[3,4],"path":[[1,6],[1,5],[2,5],[3,5],[3,4]]},"map2_3":{"seed":[4],"start":[1,2],"goal":[5,4],"path":[[1,2],[1,3],[2,3],[3,3],[4,3],[5,3],[5,4]]},"map2_4":{"seed":[4],"start":[7,4],"goal":[4,7],"path":[[7,4],[7,5],[6,5],[5,5],[5,6],[5,7],[4,7]]},"map3_0":{"seed":[1],"start":[5,7],"goal":[2,2],"path":[[5,7],[5,6],[5,5],[5,4],[4,4],[3,4],[2,4],[2,3],[2,2]]},"map3_1":{"seed":[2],"start":[5,11],"goal":[1,7],"path":[[5,11],[5,10],[5,9],[5,8],[4,8],[3,8],[2,8],[1,8],[1,7]]},"map3_2":{"seed":[3],"start":[10,5],"goal":[7,11],"path":[[10,5],[11,5],[11,6],[11,7],[10,7],[10,8],[10,9],[9,9],[8,9],[8,10],[8,11],[7,11]]},"map3_3":{"seed":[4],"start":[2,4],"goal":[9,1],"path":[[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[7,3],[7,2],[8,2],[8,1],[9,1]]},"map3_4":{"seed":[12],"start":[5,5],"goal":[10,11],"path":[[5,5],[5,6],[5,7],[5,8],[5,9],[5,10],[5,11],[6,11],[7,11],[8,11],[9,11],[10,11]]},"map4_0":{"seed":[4],"start":[10,4],"goal":[3,3],"path":[[10,4],[9,4],[9,5],[8,5],[8,6],[8,7],[7,7],[6,7],[6,6],[6,5],[5,5],[5,4],[5,3],[4,3],[3,3]]},"map4_1":{"seed":[4],"start":[7,7],"goal":[1,12],"path":[[7,7],[6,7],[5,7],[4,7],[3,7],[3,8],[3,9],[3,10],[3,11],[2,11],[1,11],[1,12]]},"map4_2":{"seed":[4],"start":[4,1],"goal":[11,11],"path":[[4,1],[3,1],[3,2],[3,3],[4,3],[5,3],[5,4],[5,5],[6,5],[6,6],[6,7],[6,8],[6,9],[5,9],[5,10],[5,11],[6,11],[7,11],[7,10],[8,10],[9,10],[10,10],[10,11],[11,11]]},"map4_3":{"seed":[6],"start":[1,8],"goal":[13,8],"path":[[1,8],[1,7],[2,7],[3,7],[4,7],[5,7],[6,7],[7,7],[8,7],[8,6],[8,5],[9,5],[9,4],[10,4],[11,4],[12,4],[12,5],[12,6],[13,6],[13,7],[13,8]]},"map4_4":{"seed":[8],"start":[5,10],"goal":[11,4],"path":[[5,10],[5,9],[6,9],[6,8],[6,7],[7,7],[8,7],[8,6],[8,5],[9,5],[9,4],[10,4],[11,4]]},"map5_0":{"seed":[0],"start":[10,4],"goal":[2,9],"path":[[10,4],[11,4],[11,5],[11,6],[11,7],[10,7],[9,7],[8,7],[8,6],[7,6],[7,5],[6,5],[5,5],[4,5],[3,5],[2,5],[1,5],[1,6],[1,7],[1,8],[2,8],[2,9]]},"map5_1":{"seed":[0],"start":[6,8],"goal":[4,13],"path":[[6,8],[7,8],[7,9],[8,9],[8,10],[8,11],[8,12],[8,13],[7,13],[6,13],[5,13],[4,13]]},"map5_2":{"seed":[2],"start":[10,7],"goal":[10,1],"path":[[10,7],[11,7],[11,6],[11,5],[11,4],[10,4],[9,4],[8,4],[8,3],[8,2],[9,2],[10,2],[10,1]]},"map5_3":{"seed":[4],"start":[1,6],"goal":[12,15],"path":[[1,6],[1,7],[1,8],[2,8],[2,9],[3,9],[3,10],[4,10],[4,11],[5,11],[6,11],[6,12],[6,13],[7,13],[8,13],[9,13],[10,13],[11,13],[12,13],[12,14],[12,15]]},"map5_4":{"seed":[5],"start":[3,10],"goal":[15,9],"path":[[3,10],[4,10],[4,11],[5,11],[6,11],[6,12],[6,13],[7,13],[8,13],[9,13],[10,13],[11,13],[12,13],[12,12],[12,11],[13,11],[14,11],[15,11],[15,10],[15,9]]}}
-
-###########
-index = 'map3_0'
-###########3
-
-seed = goals[index]['seed'][0]
-start = goals[index]['start']
-end = goals[index]['goal']
 
 env = DuckietownEnv(
     domain_rand=False,
-    max_steps=5000,
-    map_name=index,
-    seed=seed,
-    user_tile_start=start,
-    goal_tile=end,
+    max_steps=1500,
+    map_name=args.map_name,
+    seed=args.seed,
+    user_tile_start=args.start_tile,
+    goal_tile=args.goal_tile,
     randomize_maps_on_reset=False
 )
 
@@ -52,9 +43,8 @@ map_img, goal, start_pos = env.get_task_info()
 print("start tile:", start_pos, " goal tile:", goal)
 map_img = cv2.resize(map_img, None, fx=0.5,fy=0.5)
 curve_angles = {(1, -1):1, (1, 1):0, (-1,1):3, (-1,-1):2}
-# planner = MotionPlanner(env)
-# path =planner.astar()
-path = goals[index]['path']
+planner = MotionPlanner(env)
+path =planner.astar()
 print(path)
 total_reward = 0
 dts = np.array([], np.int32)
@@ -154,23 +144,24 @@ while True:
 
     if not lane_alignment:
         speed = 0
-        steering = angle_from_straight_in_rads * 5
+        steering = angle_from_straight_in_rads * 10
         print("Lane alignment")
     elif lane_alignment and not direction_alignment:
         if c != 0:
             speed = 0
-            steering = 6
+            steering = 10
             print("Tuning distance_to_road_center")
         elif c == 0:
             direction_alignment = True
             print("Done Direction")
     elif lane_alignment and direction_alignment and not opposite_aligment:
         print("distance :", distance_to_road_center)
-        if distance_to_road_center < 0.3:
+        if distance_to_road_center < -0.3:
             speed = 1
-            steering = -5.6
+            steering = -6
             print("Turn for correct lane")
         elif c != 0:
+            pass
             direction_alignment = False
         else:
             print("Done Calibration, distance:", distance_to_road_center)
@@ -195,17 +186,15 @@ while True:
     angle_from_straight_in_rads = 0
 
     predicted_pos = [round(env.cur_pos[0], 1), round(env.cur_pos[2], 1)]
-    speed = hand_speed
-    steering = hand_steering
-    if predicted_pos != trig_target:
-        lane_pose = env.get_lane_pos2(env.cur_pos, env.cur_angle)
-        k_p = 100
-        k_d = 50
-        speed = 1
-        distance_to_road_center = lane_pose.dist
-        angle_from_straight_in_rads = lane_pose.angle_rad
-        steering = k_p*distance_to_road_center + k_d*angle_from_straight_in_rads
-        # print("PID controling", steering)
+
+    lane_pose = env.get_lane_pos2(env.cur_pos, env.cur_angle)
+    k_p = 240
+    k_d = 85
+    speed = 1
+    distance_to_road_center = lane_pose.dist
+    angle_from_straight_in_rads = lane_pose.angle_rad
+    steering = k_p*distance_to_road_center + k_d*angle_from_straight_in_rads
+    # print("PID controling", steering)
 
     
     ###########################ACTION#######################3
@@ -218,8 +207,13 @@ while True:
         local_target = None
         trig_target = None
     elif predicted_pos == trig_target:
-        speed = hand_speed
-        steering = hand_steering
+        tile = env._get_tile(predicted_pos[0], predicted_pos[1])
+        if tile['kind'] != 'curve_right' and tile['kind'] != 'curve_left':
+            print("I am  controling")
+            speed = hand_speed
+            steering = hand_steering
+        else:
+            print("Let it control")
         
     try:
         path_index = path.index(predicted_pos)
@@ -229,11 +223,10 @@ while True:
             if next_point[0] != predicted_pos[0] \
                 and next_point[1] != predicted_pos[1]:
                 trig_target = mid
-                print("I am  controling")
                 hand_speed, hand_steering = get_vw(trig_target, next_point)
     except:
         pass
-    print(predicted_pos, trig_target)
+    # print(predicted_pos, trig_target)
     actions.append([speed, steering])
     obs, reward, done, info = env.step([speed, steering])
     total_reward += reward
@@ -244,7 +237,7 @@ while True:
     cv2.imshow("map", map_img)
     cv2.waitKey(10)
     env.render()
-    print(reward)
+    # print(reward)
     if done or (goal == [math.floor(env.cur_pos[0]), math.floor(env.cur_pos[2])]):
         break
 

@@ -24,10 +24,10 @@ from gym_duckietown.wrappers import UndistortWrapper
 parser = argparse.ArgumentParser()
 
 # Do not change this
-parser.add_argument('--map-name', '-m', default="map2_2", type=str)
-parser.add_argument('--seed', '-s', default=5, type=int)
-parser.add_argument('--start-tile', '-st', default="1,6", type=str, help="two numbers separated by a comma")
-parser.add_argument('--goal-tile', '-gt', default="3,4", type=str, help="two numbers separated by a comma")
+parser.add_argument('--map-name', '-m', default="map1_0", type=str)
+parser.add_argument('--seed', '-s', default=1, type=int)
+parser.add_argument('--start-tile', '-st', default="0,1", type=str, help="two numbers separated by a comma")
+parser.add_argument('--goal-tile', '-gt', default="5,1", type=str, help="two numbers separated by a comma")
 
 args = parser.parse_args()
 
