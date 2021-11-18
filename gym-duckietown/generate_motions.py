@@ -1,9 +1,9 @@
 import argparse
 from ctypes import alignment
 from genericpath import getctime
-from logging import FATAL
+from logging import FATAL, NullHandler
 from math import nan
-from os import curdir, spawnlpe, strerror
+from os import curdir, strerror
 # from hybrid_planner import *
 # from motion_planner import *
 import cv2
@@ -12,8 +12,15 @@ from gym_duckietown.envs import DuckietownEnv
 from gym_duckietown.simulator import *
 import pyglet
 import time
+import torch
+from PIL import Image
+from nnModel import predict
+
 # declare the arguments
 parser = argparse.ArgumentParser()
+
+# python generate_motions.py --max_steps 5000 --map-name map3_0 --seed 0 --stat-tile 5,7 --goal-tile 2,2
+
 
 # Do not change this
 parser.add_argument('--max_steps', type=int, default=5000, help='max_steps')
@@ -62,6 +69,8 @@ dts = np.array([], np.int32)
 
 predicted_pos = start_pos
 trig_target = None
+
+obs = []
 
 def generate_action(robot_theta, target_theta):
     if target_theta == -1:
@@ -248,8 +257,57 @@ while True:
     if done or (goal == [math.floor(env.cur_pos[0]), math.floor(env.cur_pos[2])]):
         break
 
+count = 0
+
+while True:
+    move = False
+    im = Image.fromarray(obs)
+    prediction = predict(im) # change
+    count += 1
+    im.save('../result/images/%s.png' % (count))
+    print(count, prediction)
+    if prediction == 2:
+        speed = 1
+        steering = 0
+        move = True
+
+    elif prediction == 1:
+        speed = 0.8
+        steering = 5.5    
+        move = True
+
+    elif prediction == 3:
+        speed = 0.8
+        steering = -5.5
+        move = True
+
+    elif prediction == 4:
+        cam_angle = env.unwrapped.cam_angle 
+        cam_angle -=5
+        
+    elif prediction == 0:
+        break
+
+    if move == True:
+        actions.append([speed, steering])
+        obs, reward, done, info = env.step([speed, steering])
+        total_reward += reward
+        d = [int(env.cur_pos[0] * 50), int(env.cur_pos[2] * 50)]
+        dts = np.append(dts,d)
+        dts = dts.reshape((-1,1,2))
+        map_img = cv2.polylines(map_img,[dts],False,(0,0,255), thickness=3)
+        cv2.imshow("map", map_img)
+        cv2.waitKey(10)
+        print(reward)
+
+    env.render()
+    # INTENTION_MAPPING = {'front': 2, 'left': 1, 'right': 3,'up': 4, 'stop': 0 }
+
+    
+
+
 predicted_pos = [math.floor(env.cur_pos[0]), math.floor(env.cur_pos[2])]
-np.savetxt(f'/home/marshall/Desktop/duckietown/{index}_seed{seed}_start_{start[0]},{start[1]}_goal_{end[0]},{end[1]}.txt',
+np.savetxt(f'../result/{index}_seed{seed}_start_{start[0]},{start[1]}_goal_{end[0]},{end[1]}.txt',
            actions, delimiter=',')
 
 print("done", predicted_pos, total_reward, "initial", initial_reward)

@@ -9,7 +9,7 @@ import time
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--path', '-m', default="/home/marshall/Desktop/test/", type=str)
+parser.add_argument('--path', '-m', default="./test/", type=str)
 args = parser.parse_args()
 
 target_folder = args.path
