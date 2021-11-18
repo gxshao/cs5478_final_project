@@ -242,7 +242,7 @@ while True:
         break
 
 predicted_pos = [math.floor(env.cur_pos[0]), math.floor(env.cur_pos[2])]
-np.savetxt(f'/home/marshall/Desktop/duckietown/{index}_seed{seed}_start_{start[0]},{start[1]}_goal_{end[0]},{end[1]}.txt',
+np.savetxt(f'/home/marshall/Desktop/duckietown/{args.map_name}_seed{args.seed}_start_{args.start_tile[0]},{args.start_tile[1]}_goal_{args.goal_tile[0]},{args.goal_tile[1]}.txt',
            actions, delimiter=',')
 
 print("done", predicted_pos, total_reward, "initial", initial_reward)
