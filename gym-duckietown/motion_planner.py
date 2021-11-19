@@ -7,7 +7,7 @@ from ctypes import alignment
 from genericpath import getctime
 from logging import FATAL
 from math import nan
-from os import curdir, spawnlpe, strerror
+from os import curdir, strerror
 from hybrid_planner import *
 from motion_planner import *
 import cv2

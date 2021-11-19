@@ -3,7 +3,7 @@ from ctypes import alignment
 from genericpath import getctime
 from logging import FATAL
 from math import nan
-from os import curdir, spawnlpe, strerror
+from os import curdir, strerror
 from hybrid_planner import *
 from motion_planner import *
 import cv2
@@ -247,7 +247,7 @@ while True:
         break
 
 predicted_pos = [math.floor(env.cur_pos[0]), math.floor(env.cur_pos[2])]
-np.savetxt(f'/home/marshall/Desktop/duckietown/{args.map_name}_seed{args.seed}_start_{args.start_tile[0]},{args.start_tile[1]}_goal_{args.goal_tile[0]},{args.goal_tile[1]}.txt',
+np.savetxt(f'./{args.map_name}_seed{args.seed}_start_{args.start_tile[0]},{args.start_tile[1]}_goal_{args.goal_tile[0]},{args.goal_tile[1]}.txt',
            actions, delimiter=',')
 
 print("done", predicted_pos, total_reward, "initial", initial_reward)
