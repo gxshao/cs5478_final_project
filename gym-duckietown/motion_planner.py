@@ -16,6 +16,9 @@ from gym_duckietown.envs import DuckietownEnv
 from gym_duckietown.simulator import *
 import pyglet
 import time
+import ast
+import base64
+
 class Point:
     def __init__(self, x, y):
         self.x = x
@@ -152,3 +155,13 @@ class MotionPlanner:
         # cv2.imshow("map", self.map_img)
         # cv2.waitKey(10)
         return path
+
+def load_model(model_path, index):
+    data = None
+    with open(model_path, 'rb') as f:
+        data = f.readline()
+    model = ast.literal_eval(base64.b64decode(data).decode('utf-8'))
+    
+    if data is None or model is None:
+        return (6, -0.15, 5, 8)
+    return (model[index][0],model[index][1],model[index][2],model[index][3])

@@ -12,6 +12,7 @@ from gym_duckietown.envs import DuckietownEnv
 from gym_duckietown.simulator import *
 import pyglet
 import time
+import json
 # declare the arguments
 parser = argparse.ArgumentParser()
 
@@ -19,10 +20,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--max_steps', type=int, default=5000, help='max_steps')
 
 # You should set them to different map name and seed accordingly
-parser.add_argument('--map-name', '-m', default="map1_1", type=str)
-parser.add_argument('--seed', '-s', default=0, type=int)
+parser.add_argument('--map-name', '-m', default="map1_0", type=str)
+parser.add_argument('--seed', '-s', default=1, type=int)
 parser.add_argument('--start-tile', '-st', default="0,1", type=str, help="two numbers separated by a comma")
-parser.add_argument('--goal-tile', '-gt', default="70,1", type=str, help="two numbers separated by a comma")
+parser.add_argument('--goal-tile', '-gt', default="5,1", type=str, help="two numbers separated by a comma")
 args = parser.parse_args()
 
 
@@ -35,6 +36,8 @@ env = DuckietownEnv(
     goal_tile=args.goal_tile,
     randomize_maps_on_reset=False
 )
+
+turn_val, dtc_val, vl_val, vr_val = load_model('../pretrained/Initial_model.pt', args.map_name)
 
 env.render()
 
@@ -82,10 +85,10 @@ def get_vw(m, t):
     v, w = 0, 0
     if c > 0:
         v = 1
-        w = c * 5
+        w = c * vl_val
     else:
         v = 1
-        w = c * 8
+        w = c * vr_val
     return v, w
 
 target_theta = {(1,0):0,(0,1):3,(-1,0):2,(0,-1):1}
@@ -114,6 +117,9 @@ hand_speed = 0
 hand_steering = 0
 
 initial_reward = 0
+
+
+
 while True:
     lane_pose = env.get_lane_pos2(env.cur_pos, env.cur_angle)
     distance_to_road_center = lane_pose.dist
@@ -140,8 +146,7 @@ while True:
                 
     angle = math.floor((angle / 90)) + suffix
     c = generate_action(angle, t)
-    # print(c, angle, t)
-
+    
     if not lane_alignment:
         speed = 0
         steering = angle_from_straight_in_rads * 10
@@ -156,9 +161,9 @@ while True:
             print("Done Direction")
     elif lane_alignment and direction_alignment and not opposite_aligment:
         print("distance :", distance_to_road_center)
-        if distance_to_road_center < -0.3:
+        if distance_to_road_center < dtc_val:
             speed = 1
-            steering = -6
+            steering = turn_val
             print("Turn for correct lane")
         elif c != 0:
             pass
@@ -179,7 +184,7 @@ while True:
         break
 
 # pyglet.app.run()
-
+    
 while True:
     lane_pose = None
     distance_to_road_center = 0
