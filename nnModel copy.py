@@ -27,16 +27,16 @@ class MyModel(nn.Module):
         # Build the CNN feature extractor
         self.cnn = nn.Sequential(
 
-            nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, stride=1, padding=0),
+            nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=0),
             nn.MaxPool2d((2, 2)),
-            nn.ReLU(inplace=True),
-            
-            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
             
             nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            
+            nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
             nn.ReLU(inplace=True),
 
             nn.AdaptiveMaxPool2d(output_size=(1, 1))
@@ -44,15 +44,14 @@ class MyModel(nn.Module):
 
         # Build a FC heads, taking both the image features and the intention as input 
         self.fc = nn.Sequential(
-                    nn.Linear(in_features=128, out_features=32),
-                    nn.Linear(in_features=32, out_features=num_bins))
+                    nn.Linear(in_features=256, out_features=128),
+                    nn.Linear(in_features=128, out_features=num_bins))
 
 
 
     def forward(self, x):
         x = self.cnn(x)
         x = x.view(x.size(0), -1)
-
         return x
 
 
@@ -64,13 +63,13 @@ def predict(im):
     my_model = nn.DataParallel(my_model.cuda().float())
     my_model.eval()
 
-    my_model.load_state_dict(torch.load('../model/model_update.pt'))
+    my_model.load_state_dict(torch.load('./model/model_update.pt'))
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     my_model = my_model.to(device)
 
 
     preprocessor = Compose([
-            Resize((160, 120)),
+            Resize((120, 160)),
             ToTensor()
         ])
 
@@ -89,5 +88,5 @@ def predict(im):
 
 if __name__ == "__main__":
     for i in range(1,25):
-        img = read_image('../result/images/{}.png'.format(i))
+        img = read_image('./result/images/{}.png'.format(i))
         print('test predict function : '+str(predict(img)))

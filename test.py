@@ -6,6 +6,9 @@ import numpy as np
 from gym_duckietown.envs import DuckietownEnv
 import os
 import time
+import torch
+from PIL import Image
+from nnModel import predict
 
 parser = argparse.ArgumentParser()
 
@@ -39,7 +42,6 @@ def create_test(filename, map, seed, start_pose, goal_pose):
     actions = np.loadtxt(target_folder + filename, delimiter=',')
     dts = np.array([], np.int32)
     for (speed, steering) in actions:
-
         obs, reward, done, info = env.step([speed, steering])
         total_reward += reward
         d = [int(env.cur_pos[0] * 50), int(env.cur_pos[2] * 50)]
@@ -50,6 +52,68 @@ def create_test(filename, map, seed, start_pose, goal_pose):
         cv2.waitKey(50)
         env.render()
     print("Test finished:", filename,'finale pos:', [round(env.cur_pos[0], 2), round(env.cur_pos[2], 2)], "final reward:", total_reward)
+
+    actionList = []
+    count = 0
+    cam_angle = env.unwrapped.cam_angle
+    cam_angle[0] = 10
+    rewardCNN= 0
+    leftCount= 0
+    while True:
+        move = False
+        im = Image.fromarray(obs)
+        im.save(f'./result/images/{map_name}_seed{seed}_start_{start_pose[0]},{start_pose[1]}_goal_{goal_pose[0]},{goal_pose[1]}.png')
+        prediction = predict(im) # change
+        print(count, prediction)
+        if prediction == 2:
+            leftCount +=1 
+            speed = 1
+            steering = 0
+            move = True
+
+        elif prediction == 1:
+            leftCount =0
+            speed = 1
+            steering = 9.8    
+            move = True
+
+        elif prediction == 3:
+            leftCount =0
+            speed = 1
+            steering = -9.8
+            move = True
+
+        elif prediction == 4:
+            leftCount =0
+            cam_angle = env.unwrapped.cam_angle 
+            if cam_angle[0] < -15:
+                speed = 1
+                steering = 0
+                move = True
+            else:
+                cam_angle[0] -= 5
+
+        elif prediction == 0:
+            break
+
+        if move == True:
+            actionList.append([speed, steering])
+            obs, reward, done, info = env.step([speed, steering])
+            rewardCNN += reward
+            d = [int(env.cur_pos[0] * 50), int(env.cur_pos[2] * 50)]
+            dts = np.append(dts,d)
+            dts = dts.reshape((-1,1,2))
+            map_img = cv2.polylines(map_img,[dts],False,(0,0,255), thickness=3)
+            cv2.imshow("map", map_img)
+            print(reward)
+        cv2.waitKey(50)
+        env.render()
+    print("CNN finished:", filename,'finale pos:', [round(env.cur_pos[0], 2), round(env.cur_pos[2], 2)], "cnn reward:", rewardCNN, "total reward",total_reward+rewardCNN )
+    # INTENTION_MAPPING = {'front': 2, 'left': 1, 'right': 3,'up': 4, 'stop': 0 }
+    np.savetxt(f'./result/{map_name}_seed{seed}_start_{start_pose[0]},{start_pose[1]}_goal_{goal_pose[0]},{goal_pose[1]}_action.txt',
+           actionList, delimiter=',')
+    np.savetxt(f'./result/reward/{map_name}_seed{seed}_start_{start_pose[0]},{start_pose[1]}_goal_{goal_pose[0]},{goal_pose[1]}_reward.txt',
+           [total_reward,rewardCNN,total_reward+rewardCNN], delimiter=',')
     cv2.imwrite(test_img_results + '/'+ map + '.jpg', map_img)
     time.sleep(2)
     env.window.close()
