@@ -12,8 +12,7 @@ from torchvision.transforms import *
 import sys
 import torch.nn as nn
 import torch.nn.functional as F
-from tensorboardX import SummaryWriter
-writer = SummaryWriter('log') 
+
 
 
 class MyModel(nn.Module):
@@ -83,9 +82,9 @@ def printModel():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     my_model = my_model.to(device)
 
-    dummy_input = torch.rand(20, 3, 120, 160)  
-    with SummaryWriter(comment='LeNet') as w:
-        w.add_graph(my_model, (dummy_input,))
+    # dummy_input = torch.rand(20, 3, 120, 160)  
+    # with SummaryWriter(comment='LeNet') as w:
+    #     w.add_graph(my_model, (dummy_input,))
 
 
 if __name__ == "__main__":
