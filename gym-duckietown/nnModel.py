@@ -56,7 +56,7 @@ def predict(im):
     my_model = nn.DataParallel(my_model.cuda().float())
     my_model.eval()
 
-    my_model.load_state_dict(torch.load('./model/model_update.pt'))
+    my_model.load_state_dict(torch.load('../pretrained/model_update.pt'))
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     my_model = my_model.to(device)
 

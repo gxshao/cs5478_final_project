@@ -13,6 +13,7 @@ from gym_duckietown.simulator import *
 import pyglet
 import time
 import json
+from PIL import Image
 from nnModel import predict
 
 # declare the arguments
@@ -201,11 +202,8 @@ while True:
     distance_to_road_center = lane_pose.dist
     angle_from_straight_in_rads = lane_pose.angle_rad
     steering = k_p*distance_to_road_center + k_d*angle_from_straight_in_rads
-    # print("PID controling", steering)
 
-    
-    ###########################ACTION#######################3
-
+    ###########################ACTION#######################
     
     predicted_pos = [math.floor(env.cur_pos[0]), math.floor(env.cur_pos[2])]
     # Turning finished
@@ -233,7 +231,6 @@ while True:
                 hand_speed, hand_steering = get_vw(trig_target, next_point)
     except:
         pass
-    # print(predicted_pos, trig_target)
     actions.append([speed, steering])
     obs, reward, done, info = env.step([speed, steering])
     total_reward += reward
@@ -244,88 +241,147 @@ while True:
     cv2.imshow("map", map_img)
     cv2.waitKey(10)
     env.render()
-    # print(reward)
     if done or (goal == [math.floor(env.cur_pos[0]), math.floor(env.cur_pos[2])]):
         break
 
-    actionList = []
-    count = 0
-    defalt_cam_Y = 5
-    cam_angle = env.unwrapped.cam_angle
-    cam_angle[0] = 5
-    defalt_cam_X = 0
-    print("defalt_cam_dir",defalt_cam_X)
-    rewardCNN= 0
-    leftCount= 0
-    cc= 0
 
-    while True:
-        move = False
-        viewImage = Image.fromarray(env.img_array_human)
-        im = viewImage.rotate(180).transpose(method=Image.FLIP_LEFT_RIGHT)
-        prediction = predict(im) 
-        print(-cam_angle[1], prediction)
-        if cc >= 8:
-            break
+# 
+count = 0
+defalt_cam_Y = 5
+cam_angle = env.unwrapped.cam_angle
+cam_angle[0] = 5
+defalt_cam_X = 0
+rewardCNN= 0
+leftCount= 0
+cc= 0
 
-        if prediction == 2:
-            if -cam_angle[1] < 130:
-                speed = 1
-                steering = 0
-                move = True
+while True:
+    move = False
+    viewImage = Image.fromarray(env.img_array_human)
+    im = viewImage.rotate(180).transpose(method=Image.FLIP_LEFT_RIGHT)
+    prediction = predict(im) 
+    print(-cam_angle[1], prediction)
+    if cc >= 8:
+        break
 
-            elif -cam_angle[1] >= 130 and -cam_angle[1] < 230:
-                cam_angle[1] = defalt_cam_X
-                cam_angle[0] = defalt_cam_Y
-                break
+    if prediction == 2:
+        if -cam_angle[1] < 130:
+            speed = 1
+            steering = 0
+            move = True
 
-            elif -cam_angle[1] >= 230 and -cam_angle[1] < 360:
-                speed = 1
-                steering = -(0.03 * cam_angle[1] + 19.5)
-                move = True
-
-            elif -cam_angle[1] >= 360 :
-                cam_angle[1] = defalt_cam_X
-                cam_angle[0] = defalt_cam_Y
-                break
-
-        elif prediction == 3:
+        elif -cam_angle[1] >= 130 and -cam_angle[1] < 230:
             cam_angle[1] = defalt_cam_X
             cam_angle[0] = defalt_cam_Y
             break
 
-        elif prediction == 0:
-            if -cam_angle[1] >= 270 and -cam_angle[1] < 360:
-                speed = 1
-                steering = -(0.03 * cam_angle[1] + 19.5)
-                move = True
-            elif -cam_angle[1] >= 220 and -cam_angle[1] < 270:
-                speed = -1
-                steering = (0.03 * cam_angle[1] + 19.5)
-                move = True
-            else:
-                cam_angle[1] = defalt_cam_X
-                cam_angle[0] = defalt_cam_Y
-                break
+        elif -cam_angle[1] >= 230 and -cam_angle[1] < 360:
+            speed = 1
+            steering = -(0.03 * cam_angle[1] + 19.5)
+            move = True
 
+        elif -cam_angle[1] >= 360 :
+            cam_angle[1] = defalt_cam_X
+            cam_angle[0] = defalt_cam_Y
+            break
 
+    elif prediction == 3:
+        cam_angle[1] = defalt_cam_X
+        cam_angle[0] = defalt_cam_Y
+        break
+
+    elif prediction == 0:
+        if -cam_angle[1] >= 270 and -cam_angle[1] < 360:
+            speed = 1
+            steering = -(0.03 * cam_angle[1] + 19.5)
+            move = True
+        elif -cam_angle[1] >= 220 and -cam_angle[1] < 270:
+            speed = -1
+            steering = (0.03 * cam_angle[1] + 19.5)
+            move = True
         else:
-            if -cam_angle[1] > 360:
-                if cam_angle[0] < -10:
-                    break
-                else:
-                    cam_angle[0] -=5
-                    cam_angle[1] = defalt_cam_X
-                    speed = 1
-                    steering = 0
-                    move = True
+            cam_angle[1] = defalt_cam_X
+            cam_angle[0] = defalt_cam_Y
+            break
+
+    else:
+        if -cam_angle[1] > 360:
+            if cam_angle[0] < -10:
+                break
             else:
-                cam_angle = env.unwrapped.cam_angle
-                cam_angle[1] -= 10
+                cam_angle[0] -=5
+                cam_angle[1] = defalt_cam_X
+                speed = 1
+                steering = 0
+                move = True
+        else:
+            cam_angle = env.unwrapped.cam_angle
+            cam_angle[1] -= 10
+
+    if move == True:
+        cc +=1
+        actions.append([speed, steering])
+        obs, reward, done, info = env.step([speed, steering])
+        rewardCNN += reward
+        d = [int(env.cur_pos[0] * 50), int(env.cur_pos[2] * 50)]
+        dts = np.append(dts,d)
+        dts = dts.reshape((-1,1,2))
+        map_img = cv2.polylines(map_img,[dts],False,(0,0,255), thickness=3)
+        cv2.imshow("map", map_img)
+        print(reward)
+    cv2.waitKey(50)
+    env.render()
+
+time.sleep(0.01)
+cam_angle[0] = 5
+cam_angle[1] = 0
+env.render()
+time.sleep(1)
+print("pre-cnn finished")
+while True:
+    move = False
+    viewImage = Image.fromarray(env.img_array_human)
+    im = viewImage.rotate(180).transpose(method=Image.FLIP_LEFT_RIGHT)
+    prediction = predict(im) 
+    if leftCount >= 30:
+        speed = 1
+        steering = 0
+        move = True
+        cam_angle[0] -= 5
+    else:
+        if prediction == 2:
+            leftCount = 0 
+            speed = 1
+            steering = 0
+            move = True
+
+        elif prediction == 1:
+            leftCount +=1 
+            speed = 1
+            steering = 9.8    
+            move = True
+
+        elif prediction == 3:
+            leftCount =0
+            speed = 1
+            steering = -9.8
+            move = True
+
+        elif prediction == 4:
+            leftCount =0
+            cam_angle = env.unwrapped.cam_angle 
+            if cam_angle[0] < -15:
+                speed = 1
+                steering = 0
+                move = True
+            else:
+                cam_angle[0] -= 5
+
+        elif prediction == 0:
+            break
 
         if move == True:
-            cc +=1
-            actionList.append([speed, steering])
+            actions.append([speed, steering])
             obs, reward, done, info = env.step([speed, steering])
             rewardCNN += reward
             d = [int(env.cur_pos[0] * 50), int(env.cur_pos[2] * 50)]
@@ -334,95 +390,23 @@ while True:
             map_img = cv2.polylines(map_img,[dts],False,(0,0,255), thickness=3)
             cv2.imshow("map", map_img)
             print(reward)
-        cv2.waitKey(50)
-        env.render()
 
-    time.sleep(1)
-    cam_angle[0] = 5
-    cam_angle[1] = 0
+        if count > 10:
+            break
+    cv2.waitKey(50)
     env.render()
-    time.sleep(1)
-    print("pre-cnn finished")
-    while True:
-        move = False
-        # im = Image.fromarray(obs)
-        viewImage = Image.fromarray(env.img_array_human)
-        im = viewImage.rotate(180).transpose(method=Image.FLIP_LEFT_RIGHT)
-        im.save(f'./result/images/{map_name}_seed{seed}_start_{start_pose[0]},{start_pose[1]}_goal_{goal_pose[0]},{goal_pose[1]}.png')
-        prediction = predict(im) # change
-        print(count, prediction, leftCount)
-        if leftCount >= 30:
-            speed = 1
-            steering = 0
-            move = True
-            cam_angle[0] -= 5
-        else:
-            if prediction == 2:
-                leftCount = 0 
-                speed = 1
-                steering = 0
-                move = True
-
-            elif prediction == 1:
-                leftCount +=1 
-                speed = 1
-                steering = 9.8    
-                move = True
-
-            elif prediction == 3:
-                leftCount =0
-                speed = 1
-                steering = -9.8
-                move = True
-
-            elif prediction == 4:
-                leftCount =0
-                cam_angle = env.unwrapped.cam_angle 
-                if cam_angle[0] < -15:
-                    speed = 1
-                    steering = 0
-                    move = True
-                else:
-                    cam_angle[0] -= 5
-
-            elif prediction == 0:
-                break
-
-            if move == True:
-                actionList.append([speed, steering])
-                obs, reward, done, info = env.step([speed, steering])
-                rewardCNN += reward
-                d = [int(env.cur_pos[0] * 50), int(env.cur_pos[2] * 50)]
-                dts = np.append(dts,d)
-                dts = dts.reshape((-1,1,2))
-                map_img = cv2.polylines(map_img,[dts],False,(0,0,255), thickness=3)
-                cv2.imshow("map", map_img)
-                print(reward)
-
-            if count > 50:
-                break
-        cv2.waitKey(50)
-        env.render()
-    print("CNN finished:", filename,'finale pos:', [round(env.cur_pos[0], 2), round(env.cur_pos[2], 2)], "cnn reward:", rewardCNN, "total reward",total_reward+rewardCNN )
-    # INTENTION_MAPPING = {'front': 2, 'left': 1, 'right': 3,'up': 4, 'stop': 0 }
-    np.savetxt(f'./result/{map_name}_seed{seed}_start_{start_pose[0]},{start_pose[1]}_goal_{goal_pose[0]},{goal_pose[1]}_action.txt',
-           actionList, delimiter=',')
-    np.savetxt(f'./result/reward/{map_name}_seed{seed}_start_{start_pose[0]},{start_pose[1]}_goal_{goal_pose[0]},{goal_pose[1]}_reward.txt',
-           [total_reward,rewardCNN,total_reward+rewardCNN], delimiter=',')
-    cv2.imwrite(test_img_results + '/'+ map + '.jpg', map_img)
-    time.sleep(2)
-    env.window.close()
-    cv2.destroyAllWindows()
+    print("CNN finished:",'finale pos:', [round(env.cur_pos[0], 2), round(env.cur_pos[2], 2)], "cnn reward:", rewardCNN, "total reward",total_reward+rewardCNN )
 
 
+np.savetxt(f'./{args.map_name}_seed{args.seed}_start_{start_pos[0]},{start_pos[1]}_goal_{goal[0]},{goal[1]}_reward.txt',
+        [total_reward,rewardCNN,total_reward+rewardCNN], delimiter=',')
 
-
-
-
-
+time.sleep(0.001)
+env.window.close()
+cv2.destroyAllWindows()
 
 predicted_pos = [math.floor(env.cur_pos[0]), math.floor(env.cur_pos[2])]
-np.savetxt(f'./{args.map_name}_seed{args.seed}_start_{args.start_tile[0]},{args.start_tile[1]}_goal_{args.goal_tile[0]},{args.goal_tile[1]}.txt',
+np.savetxt(f'./{args.map_name}_seed{args.seed}_start_{start_pos[0]},{start_pos[1]}_goal_{goal[0]},{goal[1]}.txt',
            actions, delimiter=',')
 
 print("done", predicted_pos, total_reward, "initial", initial_reward)
